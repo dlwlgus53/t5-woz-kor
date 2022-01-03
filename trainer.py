@@ -85,7 +85,6 @@ def test(args, model, test_loader, test_dataset):
     logger.info("Test start")
     with torch.no_grad():
         for iter,batch in enumerate(test_loader):
-            pdb.set_trace()
             outputs = model(input_ids=batch['input']['input_ids'].to('cuda'), labels=batch['target']['input_ids'].to('cuda'))
             outputs_text = model.generate(input_ids=batch['input']['input_ids'].to('cuda'))
             outputs_text = [args.tokenizer.decode(o).replace('</s>','').replace('<pad>','').strip() for o in outputs_text]
