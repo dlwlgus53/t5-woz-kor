@@ -198,9 +198,9 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    args.data_path = '../woz-data/MultiWOZ_2.1/train_data0.001.json
+    args.data_path = '../KLUE/dev_data.json'
     from transformers import T5Tokenizer
-    args.tokenizer = T5Tokenizer.from_pretrained('t5-small')
+    args.tokenizer = T5Tokenizer.from_pretrained('KETI-AIR/ke-t5-base-ko')
     
     dataset = Dataset(args, args.data_path, 'train')
     loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=16, collate_fn=dataset.collate_fn)
