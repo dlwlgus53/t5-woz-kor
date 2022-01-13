@@ -40,6 +40,7 @@ parser.add_argument('--save_prefix', type = str, help = 'prefix for all savings'
 parser.add_argument('-n', '--nodes', default=1,type=int, metavar='N')
 parser.add_argument('-g', '--gpus', default=4, type=int,help='number of gpus per node')
 parser.add_argument('-nr', '--nr', default=0, type=int,help='ranking within the nodes')
+parser.add_argument('--aux' ,  type = int, default=1)
 
 args = parser.parse_args()
 init.init_experiment(args)

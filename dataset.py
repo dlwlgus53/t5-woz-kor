@@ -18,6 +18,7 @@ class Dataset(torch.utils.data.Dataset):
         self.tokenizer = args.tokenizer
         self.dst_student_rate = args.dst_student_rate
         self.max_length = args.max_length
+        self.aux = args.aux
         
         
         self.belief_state= defaultdict(lambda : defaultdict(dict))# dial_id, # turn_id
@@ -107,6 +108,27 @@ class Dataset(torch.utils.data.Dataset):
                         question.append(q)
                         dial_id.append(d_id)
                         turn_id.append(t_id)
+                        
+                        
+                # ###########changed part ###########################################
+                if self.data_type == 'train' and self.aux == 1:
+                    for key_idx, key in enumerate(ontology.QA['all-domain']): # TODO
+                        # domain = key.split("_")[0]
+                        # if self.zeroshot_domain and domain == self.zeroshot_domain: continue
+                        domain_name = " ".join(key.split("_"))
+                        q = "대화에 " +domain_name  + ontology.QA["general-question"] +  "?" 
+                        c = dialogue_text
+                        if key in turn['belief']: # 언급을 한 경우
+                            a = '네'
+                        else:
+                            a = '아니요'
+
+                        schema.append(key)
+                        answer.append(a)
+                        question.append(q)
+                        dial_id.append(d_id)
+                        turn_id.append(t_id)
+                # ########################################################################     
                     
                 gold_belief_state[d_id][t_id] = turn['belief']
                 gold_context[d_id][t_id] = dialogue_text
@@ -196,6 +218,8 @@ if __name__ == '__main__':
     parser.add_argument('--do_short' ,  type = int, default=1)
     parser.add_argument('--dst_student_rate' ,  type = float, default=0.5)
     parser.add_argument('--seed' ,  type = float, default=1)
+    parser.add_argument('--aux' ,  type = int, default=1)
+    
     parser.add_argument('--max_length' ,  type = int, default=128)
     
     
