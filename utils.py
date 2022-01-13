@@ -34,7 +34,7 @@ def makedirs(path):
            raise
        
 def evaluate_metrics(all_prediction, raw_file, detail_log):
-    schema = ontology.QA['all-domain'][:-1] # next response 는 제외
+    schema = ontology.QA['all-domain'] # next response 는 제외
     domain = ontology.QA['bigger-domain']
     
     detail_wrongs= defaultdict(lambda : defaultdict(list))# dial_id, # turn_id # schema
@@ -46,8 +46,11 @@ def evaluate_metrics(all_prediction, raw_file, detail_log):
         if key not in all_prediction.keys(): continue
         dial = raw_file[key]
         for turn_idx, turn in enumerate(dial):
-            belief_label = turn['belief']
-            belief_pred = all_prediction[key][str(turn_idx)]
+            try:
+                belief_label = turn['belief']
+                belief_pred = all_prediction[key][str(turn_idx)]
+            except:
+                pdb.set_trace()
             
             belief_label = [f'{k} : {v}' for (k,v) in belief_label.items()] 
             belief_pred = [f'{k} : {v}' for (k,v) in belief_pred.items()] 
@@ -116,7 +119,7 @@ def compute_acc(gold, pred, slot_temp, domain, detail_log):
         if p not in gold and p.split(" : ")[0] not in miss_slot:
             wrong_pred += 1
             schema_acc[p.split(" : ")[0]] -=1
-            domain_acc[p.split("-")[0]] -=1
+            domain_acc[p.split("_")[0]] -=1
             if detail_log:
                 detail_wrong.append((ontology.QA['NOT_MENTIONED'],p))
             

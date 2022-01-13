@@ -191,7 +191,7 @@ QA = {
         '지하철',
         '택시'
     ],
-    "NOT_MENTIONED" : 'not mentioned',
+    "NOT_MENTIONED" : '언급 없음',
 }
 
 

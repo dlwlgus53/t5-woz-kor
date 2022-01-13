@@ -93,17 +93,20 @@ class Dataset(torch.utils.data.Dataset):
                 dialogue_text += turn['user']
                 for key_idx, key in enumerate(ontology.QA['all-domain']): # TODO
                     q = ontology.QA[key]['description']
+                    a = None
                     if key in turn['belief']: # 언급을 한 경우
                         a = turn['belief'][key]
                         if isinstance(a, list) : a= a[0] # in muptiple type, a == ['sunday',6]
-                    else: a = ontology.QA['NOT_MENTIONED']
+                        else:
+                            if(random.random()>0.5) and self.data_type == 'train':continue
+                            else:a = ontology.QA['NOT_MENTIONED']
                     
-
-                    schema.append(key)
-                    answer.append(a)
-                    question.append(q)
-                    dial_id.append(d_id)
-                    turn_id.append(t_id)
+                    if a:
+                        schema.append(key)
+                        answer.append(a)
+                        question.append(q)
+                        dial_id.append(d_id)
+                        turn_id.append(t_id)
                     
                 gold_belief_state[d_id][t_id] = turn['belief']
                 gold_context[d_id][t_id] = dialogue_text
@@ -124,7 +127,7 @@ class Dataset(torch.utils.data.Dataset):
         
         
         # sort guaranteed to be stable : it is important because of question!   
-        assert schema_sort == schema
+        # assert schema_sort == schema
         return turn_id, dial_id,  question, schema, answer, gold_belief_state, gold_context
 
     def __getitem__(self, index):
@@ -198,14 +201,15 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    args.data_path = '../KLUE/dev_data.json'
+    args.data_path = '../KLUE/train_data.json'
     from transformers import T5Tokenizer
-    args.tokenizer = T5Tokenizer.from_pretrained('KETI-AIR/ke-t5-base-ko')
+    args.tokenizer = T5Tokenizer.from_pretrained('google/mt5-small')
     
     dataset = Dataset(args, args.data_path, 'train')
     loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=16, collate_fn=dataset.collate_fn)
-        
+    t = args.tokenizer
     for batch in loader:
+        t.decode(batch['input']['input_ids'][5])
         pdb.set_trace()
     
     
