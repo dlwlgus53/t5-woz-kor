@@ -94,20 +94,17 @@ class Dataset(torch.utils.data.Dataset):
                 dialogue_text += turn['user']
                 for key_idx, key in enumerate(ontology.QA['all-domain']): # TODO
                     q = ontology.QA[key]['description']
-                    a = None
+                    
                     if key in turn['belief']: # 언급을 한 경우
                         a = turn['belief'][key]
                         if isinstance(a, list) : a= a[0] # in muptiple type, a == ['sunday',6]
-                        else:
-                            if(random.random()>0.5) and self.data_type == 'train':continue
-                            else:a = ontology.QA['NOT_MENTIONED']
+                    else:a = ontology.QA['NOT_MENTIONED']
                     
-                    if a:
-                        schema.append(key)
-                        answer.append(a)
-                        question.append(q)
-                        dial_id.append(d_id)
-                        turn_id.append(t_id)
+                    schema.append(key)
+                    answer.append(a)
+                    question.append(q)
+                    dial_id.append(d_id)
+                    turn_id.append(t_id)
                         
                         
                 # ###########changed part ###########################################
@@ -116,7 +113,7 @@ class Dataset(torch.utils.data.Dataset):
                         # domain = key.split("_")[0]
                         # if self.zeroshot_domain and domain == self.zeroshot_domain: continue
                         domain_name = " ".join(key.split("_"))
-                        q = "대화에 " +domain_name  + ontology.QA["general-question"] +  "?" 
+                        q = "대화에 " +domain_name  + " " + ontology.QA["general-question"] +  "?" 
                         c = dialogue_text
                         if key in turn['belief']: # 언급을 한 경우
                             a = '네'
@@ -216,7 +213,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--data_rate' ,  type = float, default=1.0)
     parser.add_argument('--do_short' ,  type = int, default=1)
-    parser.add_argument('--dst_student_rate' ,  type = float, default=0.5)
+    parser.add_argument('--dst_student_rate' ,  type = float, default=0.0)
     parser.add_argument('--seed' ,  type = float, default=1)
     parser.add_argument('--aux' ,  type = int, default=1)
     
@@ -233,7 +230,7 @@ if __name__ == '__main__':
     loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=16, collate_fn=dataset.collate_fn)
     t = args.tokenizer
     for batch in loader:
-        t.decode(batch['input']['input_ids'][5])
+        print(t.decode(batch['input']['input_ids'][5]))
         pdb.set_trace()
     
     
