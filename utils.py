@@ -2,7 +2,6 @@
 import os
 import csv, json
 
-from mwzeval.metrics import Evaluator
 import logging
 import ontology
 from collections import defaultdict
