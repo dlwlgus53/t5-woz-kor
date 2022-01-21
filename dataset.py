@@ -185,10 +185,11 @@ class Dataset(torch.utils.data.Dataset):
         schema = [x["schema"] for x in batch]
         target_list = [x["target"] for x in batch]
         
-        if do_dst_student or self.data_type == 'test':
+        if  self.data_type == 'test':
             belief = [self.belief_state[d][t-1]for (d,t) in zip(dial_id, turn_id)] 
         else:
-            belief = [self.gold_belief_state[d][t-1]for (d,t) in zip(dial_id, turn_id)] 
+            belief = [self.belief_state[d][t-1]for (d,t) in zip(dial_id, turn_id)] 
+            # belief = [self.gold_belief_state[d][t-1]for (d,t) in zip(dial_id, turn_id)] 
 
         history = [self.gold_context[d][t] for (d,t) in zip(dial_id, turn_id)]
         input_source = [f"question: {q} context: {c} belief: {b}" for (q,c,b) in  \

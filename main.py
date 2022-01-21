@@ -41,11 +41,27 @@ parser.add_argument('-n', '--nodes', default=1,type=int, metavar='N')
 parser.add_argument('-g', '--gpus', default=4, type=int,help='number of gpus per node')
 parser.add_argument('-nr', '--nr', default=0, type=int,help='ranking within the nodes')
 parser.add_argument('--aux' ,  type = int, default=1)
+parser.add_argument('--train_continue', type=int, default = 0)
 
 args = parser.parse_args()
 init.init_experiment(args)
 logger = logging.getLogger("my")
-       
+
+
+def load_trained(args,model, optimizer = None):
+    logger.info(f"User pretrained model{args.pretrained_model}")
+    state_dict = torch.load(args.pretrained_model)
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        name = k[7:] # remove 'module.' of DataParallel/DistributedDataParallel
+        new_state_dict[name] = v
+    model.load_state_dict(new_state_dict)
+    if optimizer:
+        opt_path = "./model/optimizer/" + args.pretrained_model[7:] #todo
+        optimizer.load_state_dict(torch.load(opt_path))
+    print("load safely")
+    
+         
 def get_loader(dataset,batch_size):
     train_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
     shuffle = False
@@ -69,6 +85,10 @@ def main_worker(gpu, args):
 
         
     model = T5ForConditionalGeneration.from_pretrained(args.base_trained, return_dict=True).to(gpu)
+    
+    if args.pretrained_model and args.train_continue:
+        load_trained(args,model)        
+        
     model = DDP(model, device_ids=[gpu])
     
     train_dataset =Dataset(args, args.train_path, 'train')
@@ -102,6 +122,7 @@ def main_worker(gpu, args):
             min_loss = loss
             best_performance['min_loss'] = min_loss.item()
             if not args.debugging:
+                torch.save(optimizer.state_dict(), f"model/optimizer/woz{args.save_prefix}{args.data_rate}.pt")
                 torch.save(model.state_dict(), f"model/woz{args.save_prefix}{args.data_rate}.pt")
             logger.info("safely saved")
                 
@@ -153,7 +174,6 @@ def evaluate():
     
 def main():
     logger.info(args)
-    utils.makedirs("./data"); utils.makedirs("./logs"); utils.makedirs("./model"); utils.makedirs("./out");
     args.world_size = args.gpus * args.nodes 
     args.tokenizer = T5Tokenizer.from_pretrained(args.base_trained)
     if args.do_train:
@@ -168,7 +188,7 @@ def main():
     evaluate()
 
 if __name__ =="__main__":
-    utils.makedirs("./data"); utils.makedirs("./logs"); utils.makedirs("./model");
+    utils.makedirs("./data"); utils.makedirs("./logs"); utils.makedirs("./model/optimizer"); utils.makedirs("./out");
     logger.info(f"{'-' * 30}")
     logger.info("Start New Trainning")
     start = time.time()
