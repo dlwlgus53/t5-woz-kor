@@ -88,14 +88,13 @@ def test(args, model, test_loader, test_dataset):
             outputs = model(input_ids=batch['input']['input_ids'].to('cuda'), labels=batch['target']['input_ids'].to('cuda'))
             outputs_text = model.generate(input_ids=batch['input']['input_ids'].to('cuda'))
             outputs_text = [args.tokenizer.decode(o).replace('</s>','').replace('<pad>','').strip() for o in outputs_text]
-
+            
             for idx in range(len(outputs_text)):
                 dial_id = batch['dial_id'][idx]
                 turn_id = batch['turn_id'][idx]
                 schema = batch['schema'][idx]
                 if turn_id not in belief_state[dial_id].keys():
                     belief_state[dial_id][turn_id] = {}
-                
                 if outputs_text[idx] == ontology.QA['NOT_MENTIONED'] : continue
     
                 belief_state[dial_id][turn_id][schema] = outputs_text[idx]
@@ -109,7 +108,7 @@ def test(args, model, test_loader, test_dataset):
                 ))
          
         with open('logs/pred_belief.json', 'w') as fp:
-            json.dump(belief_state, fp, indent=4)
+            json.dump(belief_state, fp, indent=4, ensure_ascii=False)
             
 
     

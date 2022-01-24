@@ -94,7 +94,7 @@ class Dataset(torch.utils.data.Dataset):
                 dialogue_text += turn['user']
                 for key_idx, key in enumerate(ontology.QA['all-domain']): # TODO
                     q = ontology.QA[key]['description']
-                    
+
                     if key in turn['belief']: # 언급을 한 경우
                         a = turn['belief'][key]
                         if isinstance(a, list) : a= a[0] # in muptiple type, a == ['sunday',6]
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    args.data_path = '../KLUE/train_data.json'
+    args.data_path = '../KLUE/dev_data_short.json'
     from transformers import T5Tokenizer
     args.tokenizer = T5Tokenizer.from_pretrained('google/mt5-small')
     
@@ -231,7 +231,11 @@ if __name__ == '__main__':
     loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=16, collate_fn=dataset.collate_fn)
     t = args.tokenizer
     for batch in loader:
-        print(t.decode(batch['input']['input_ids'][5]))
+        for i in range(16):
+            print(t.decode(batch['input']['input_ids'][i]))
+            print(t.decode(batch['target']['input_ids'][i]))
+            print()
+            
         pdb.set_trace()
     
     

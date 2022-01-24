@@ -13,15 +13,15 @@ import pickle
 def idx_to_text(tokenizer, idx):
     pass
 def dict_to_csv(data, file_name):
-    w = csv.writer(open(f'./logs/csvs/{file_name}', "a"))
+    w = csv.writer(open(f'./logs/csvs/{file_name}', "w"))
     for k,v in data.items():
         w.writerow([k,v])
     w.writerow(['===============','================='])
     
     
 def dict_to_json(data, file_name):
-    with open(f'./logs/jsons/{file_name}', 'a') as fp:
-        json.dump(data, fp,  indent=4)
+    with open(f'./logs/jsons/{file_name}', 'w') as fp:
+        json.dump(data, fp,  indent=4, ensure_ascii=False)
 
 
 
@@ -47,7 +47,7 @@ def evaluate_metrics(all_prediction, raw_file, detail_log):
         for turn_idx, turn in enumerate(dial):
             try:
                 belief_label = turn['belief']
-                belief_pred = all_prediction[key][str(turn_idx)]
+                belief_pred = all_prediction[key][turn_idx]
             except:
                 pdb.set_trace()
             
